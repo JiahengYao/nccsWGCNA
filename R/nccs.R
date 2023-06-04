@@ -1,0 +1,292 @@
+#' @title Net Compare Cross Species of WGCNA
+#'
+#' @description This package provides a WGCNA net cross species comparison method for an unspecified subset of genes. You need to provide WGCNA results for two species, including 'ConsonsusTOM block. 1. rda' and 'net'. Return four easily understandable visual network diagrams.
+#' This project is based on cross species comparison between humans and mice, so the two species to be compared are referred to as humans and mice in this project. But we believe that this can also be directly applied to comparative studies of other species.
+
+#' @param humangene,mousegene must be a one-to-one corresponding gene list to be analyzed.
+#' @param humandata,mousedata fill in the file 'ConsonsusTOM block. 1. rda' of human or mouse, which includes the variable 'consTomDS'.
+#' @param humannet,mousenet fill in the file 'net. rda' of human or mouse, which includes the variable 'net'.'consTomDS' and 'net' were generated during the execution of WGCNA.
+#'
+#'A code example for generating such files is:
+#'
+#'net=blockwiseConsensusModules(multiExpr, blocks = NULL,
+#                                         maxBlockSize = 30000, ## This should be set to a smaller size if the user has limited RAM
+#                                         randomSeed = 12345,
+#                                         corType = "pearson",
+#                                         power = softPower,
+#                                         consensusQuantile = 0.3,
+#                                         networkType = "signed",
+#                                         TOMType = "unsigned",
+#                                         TOMDenom = "min",
+#                                         scaleTOMs = TRUE, scaleQuantile = 0.8,
+#                                         sampleForScaling = TRUE, sampleForScalingFactor = 1000,
+#                                         useDiskCache = TRUE, chunkSize = NULL,
+#                                         deepSplit = 4,
+#                                         pamStage=FALSE,
+#                                         detectCutHeight = 0.995, minModuleSize = 50,
+#                                         mergeCutHeight = 0.2,
+#                                         saveConsensusTOMs = TRUE,
+#                                         consensusTOMFilePattern = "ConsensusTOM-block.1.rda")
+#' @param humanmodcolor,mousemodcolor The color of the module which you analyzed.
+#' @param k (=20) The multiple relationship between 'background adjacency' and 'important adjacency' can be adjusted by k.
+#' @param linecoloralpha (=c(0.40,0.40,0.40,0.40)) The transparency of the lines in the image can be specified separately by adjusting the linecoloralpha, which is crucial for visualizing the results
+
+#' @return 4 picture of net compare will be build in
+
+#' @examples nccs(humangene_1,mousegene_1,humandata_1,mousedata_1,humannet_1,mousenet_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3))
+#' @import igraph
+#' @import RColorBrewer
+#' @export
+
+#import
+#install.packages('igraph')
+#install.packages('RColorBrewer')
+#library(igraph);
+#library(RColorBrewer);
+#load('./data/geneidlist.Rdata')
+#load(humandatapwd_1)
+#humanconsTomDS=consTomDS
+#humandata_1=consTomDS
+#load(mousedatapwd_1)
+#mousedata_1=consTomDS
+#mouseconsTomDS=consTomDS
+#load(humannetpwd_1)
+#humannet_1=net
+#load(mousenetpwd_1)
+#mousenet_1=net
+#use_data(humandata_1,mousedata_1,humannet_1,mousenet_1)
+#humangene=humangene_1
+#mousegene=mousegene_1
+#humandata=humandata_1
+#mousedata=mousedata_1
+#humannet=humannet_1
+#mousenet=mousenet_1
+#nccs(humangene_1,mousegene_1,humandata_1,mousedata_1,humannet_1,mousenet_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3))
+nccs<- function(humangene,mousegene,humandata,mousedata,humannet,mousenet,humanmodcolor,mousemodcolor,k=20,linecoloralpha=c(0.40,0.40,0.40,0.40)) {
+  humanconsTomDS=humandata
+  mouseconsTomDS=mousedata
+
+  humanTOM.matrix = as.matrix(humanconsTomDS)
+  humannames2=unlist(attr(humannet$colors ,'names'))
+
+  mouseTOM.matrix = as.matrix(mouseconsTomDS)
+  mousenames2=unlist(attr(mousenet$colors ,'names'))
+
+  generesult=unlist(list())
+  genelist=humannames2
+  species='human'
+  if(length(union(genelist,unlist(geneidlist[3])))>length(union(genelist,unlist(geneidlist[2])))){#和人合并，显然并集小的为其现有归属
+    flag=2
+  }else{flag=3}
+  #print(flag)
+  if (species=="human"){
+    generesult=unlist(list())
+    for (i in (genelist)){
+      generesult=append(generesult,unlist(geneidlist[2])[which(unlist(geneidlist[flag])== i)])
+    }
+  }
+  if (species=='mouse'){
+    generesult=unlist(list())
+    for (i in (genelist)){
+      generesult=append(generesult,unlist(geneidlist[3])[which(unlist(geneidlist[flag])== i)])
+    }
+  }
+  humannames2=generesult
+  generesult=unlist(list())
+  genelist=mousenames2
+  species='mouse'
+  if(length(union(genelist,unlist(geneidlist[3])))>length(union(genelist,unlist(geneidlist[2])))){#和人合并，显然并集小的为其现有归属
+    flag=2
+  }else{flag=3}
+  #print(flag)
+  if (species=="mouse"){
+    generesult=unlist(list())
+    for (i in (genelist)){
+      generesult=append(generesult,unlist(geneidlist[2])[which(unlist(geneidlist[flag])== i)])
+    }
+  }
+  if (species=='mouse'){
+    generesult=unlist(list())
+    for (i in (genelist)){
+      generesult=append(generesult,unlist(geneidlist[3])[which(unlist(geneidlist[flag])== i)])
+    }
+  }
+  mousenames2=generesult
+
+  colnames(humanTOM.matrix)=humannames2
+  rownames(humanTOM.matrix)=humannames2
+  colnames(mouseTOM.matrix)=mousenames2
+  rownames(mouseTOM.matrix)=mousenames2
+
+  humanreducedTOM = humanTOM.matrix[humangene[(humangene %in% humannames2)],humangene[(humangene %in% humannames2)]]
+  mousereducedTOM = mouseTOM.matrix[mousegene[(mousegene %in% mousenames2)],mousegene[(mousegene %in% mousenames2)]]
+
+  ghuman <- graph.adjacency(as.matrix(humanreducedTOM),mode="undirected",weighted=TRUE,diag=FALSE)
+  gmouse <- graph.adjacency(as.matrix(mousereducedTOM),mode="undirected",weighted=TRUE,diag=FALSE)
+  genenumber=length(humangene)
+  numberA=floor(genenumber*2/5)
+  gA <- graph.adjacency(as.matrix(humanreducedTOM[1:numberA,1:numberA]),mode="undirected",weighted=TRUE,diag=FALSE)
+  gB <- graph.adjacency(as.matrix(humanreducedTOM[(numberA+1):genenumber,(numberA+1):genenumber]),mode="undirected",weighted=TRUE,diag=FALSE)
+  layoutCircle <- rbind(layout.circle(gA)/2,layout.circle(gB))
+
+  kh=1/mean(as.numeric(unlist(attr(table(humanreducedTOM),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM),'dimnames'))))])
+
+  for (i in seq(from=1,to=200,by=1)){
+    humanreducedTOM3=((humanreducedTOM)*kh)^i/max(((humanreducedTOM)*kh)^i)*k
+    if(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))]))
+      #print(i)
+      humanhj1=i
+      break
+    }}
+
+  for (i in seq(from=humanhj1-1.1,to=200,by=0.01)){
+    humanreducedTOM3=((humanreducedTOM)*kh)^i/max(((humanreducedTOM)*kh)^i)*k
+    if(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))]))
+      #print(i)
+      humanhj2=i
+      break
+    }}
+
+  for (i in seq(from=humanhj2-0.011,to=200,by=0.0001)){
+    humanreducedTOM3=((humanreducedTOM)*kh)^i/max(((humanreducedTOM)*kh)^i)*k
+    if(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))]))
+      #print(i)
+      humanhj3=i
+      break
+    }}
+
+
+  for (i in seq(from=humanhj3-0.00011,to=200,by=0.000001)){
+    humanreducedTOM3=((humanreducedTOM)*kh)^i/max(((humanreducedTOM)*kh)^i)*k
+    if(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(humanreducedTOM3),'dimnames'))))]))
+      #print(i)
+      humanhj4=i
+      break
+    }}
+
+
+  km=1/mean(as.numeric(unlist(attr(table(mousereducedTOM),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM),'dimnames'))))])
+
+
+  for (i in seq(from=1,to=200,by=1)){
+    mousereducedTOM3=((mousereducedTOM)*km)^i/max(((mousereducedTOM)*km)^i)*k
+    if(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))]))
+      #print(i)
+      mousehj1=i
+      break
+    }}
+
+  for (i in seq(from=mousehj1-1.1,to=200,by=0.01)){
+    mousereducedTOM3=((mousereducedTOM)*km)^i/max(((mousereducedTOM)*km)^i)*k
+    if(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))]))
+      #print(i)
+      mousehj2=i
+      break
+    }}
+
+  for (i in seq(from=mousehj2-0.011,to=200,by=0.0001)){
+    mousereducedTOM3=((mousereducedTOM)*km)^i/max(((mousereducedTOM)*km)^i)*k
+    if(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))]))
+      #print(i)
+      mousehj3=i
+      break
+    }}
+
+
+  for (i in seq(from=mousehj3-0.00011,to=200,by=0.000001)){
+    mousereducedTOM3=((mousereducedTOM)*km)^i/max(((mousereducedTOM)*km)^i)*k
+    if(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))])<1){
+      #print(mean(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames')))[2:length(as.numeric(unlist(attr(table(mousereducedTOM3),'dimnames'))))]))
+      #print(i)
+      mousehj4=i
+      break
+    }}
+  humanfl=humanhj4
+  humanreducedTOM2=((humanreducedTOM)*kh)^humanfl/max(((humanreducedTOM)*kh)^humanfl)*k
+  mousefl=mousehj4
+  mousereducedTOM2=((mousereducedTOM)*km)^mousefl/max(((mousereducedTOM)*km)^mousefl)*k
+
+  tomm3=humanreducedTOM2-mousereducedTOM2
+  tomm4=mousereducedTOM2-humanreducedTOM2
+
+  pdf(paste0('result of nccsWGCNA.pdf'),height=9,width=10)
+
+  plot(ghuman,
+       edge.color=adjustcolor(humanmodcolor, alpha.f=linecoloralpha[1]),
+       edge.alpha=0.25,
+       edge.width=humanreducedTOM2,
+       vertex.color=adjustcolor(humanmodcolor, alpha.f=0.75),
+       #vertex.label=as.character(submatrix$GeneSymbol),
+       vertex.label=as.character(humangene),
+       vertex.label.cex=1.1,
+       vertex.label.dist=1.1,
+       vertex.label.degree=-pi/4,
+       vertex.label.color="black",
+       #vertex.frame.color='black',
+       layout= jitter(layoutCircle),
+       vertex.size=6,
+       #main=paste("human",humanmod,"module cluster ",humanclusternumber)
+       main=paste("Human Transformational Adjacency Network")
+  )
+
+
+  plot(gmouse,
+       edge.color=adjustcolor(mousemodcolor, alpha.f=linecoloralpha[2]),
+       edge.alpha=0.25,
+       edge.width=mousereducedTOM2,
+       vertex.color=adjustcolor(mousemodcolor, alpha.f=0.75),
+       #vertex.label=as.character(submatrix$GeneSymbol),
+       vertex.label=as.character(mousegene),
+       vertex.label.cex=1.1,
+       vertex.label.dist=1.1,
+       vertex.label.degree=-pi/4,
+       vertex.label.color="black",
+       #vertex.frame.color='black',
+       layout= jitter(layoutCircle),
+       vertex.size=6,
+       #main=paste('mouse',mousemod,"module cluster ",mouseclusternumber)
+       main=paste("Mouse Transformational Adjacency Network")
+  )
+  plot(ghuman,
+       edge.color=adjustcolor(humanmodcolor, alpha.f=linecoloralpha[3]),
+       edge.alpha=0.25,
+       edge.width=tomm3,
+       vertex.color=adjustcolor(humanmodcolor, alpha.f=0.75),
+       #vertex.label=as.character(submatrix$GeneSymbol),
+       vertex.label=as.character(humangene),
+       vertex.label.cex=1.1,
+       vertex.label.dist=1.1,
+       vertex.label.degree=-pi/4,
+       vertex.label.color="black",
+       #vertex.frame.color='black',
+       layout= jitter(layoutCircle),
+       vertex.size=6,
+       #main=paste("human",humanmod,"module cluster ",humanclusternumber,' - mouse',mousemod,'module cluster ',mouseclusternumber)
+       main=paste("Human-Mouse Transformational Adjacency Network")
+  )
+  plot(gmouse,
+       edge.color=adjustcolor(mousemodcolor, alpha.f=linecoloralpha[4]),
+       edge.alpha=0.25,
+       edge.width=tomm4,
+       vertex.color=adjustcolor(mousemodcolor, alpha.f=0.75),
+       #vertex.label=as.character(submatrix$GeneSymbol),
+       vertex.label=as.character(mousegene),
+       vertex.label.cex=1.1,
+       vertex.label.dist=1.1,
+       vertex.label.degree=-pi/4,
+       vertex.label.color="black",
+       #vertex.frame.color='black',
+       layout= jitter(layoutCircle),
+       vertex.size=6,
+       #main=paste('mouse',mousemod,"module cluster ",mouseclusternumber," - human",humanmod,'module cluster ',humanclusternumber)
+       main=paste("Mouse-Human Transformational Adjacency Network")
+  )
+  dev.off()
+}
