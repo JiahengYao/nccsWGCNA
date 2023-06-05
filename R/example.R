@@ -1,12 +1,12 @@
 #getwd()
-#load('./data/humangene.Rdata')
-#load('./data/mousegene.Rdata')
+#load('./extdata/humangene.Rdata')
+#load('./extdata/mousegene.Rdata')
 #humangene_1=humangene
 #mousegene_1=humangene
-#humandatapwd_1='./data/human/ConsensusTOM-block.1.rda'
-#humannetpwd_1='./data/human/net.Rdata'
-#mousedatapwd_1='./data/mouse/ConsensusTOM-block.1.rda'
-#mousenetpwd_1='./data/mouse/net.Rdata'
+#humandatapwd_1='./extdata/human/ConsensusTOM-block.1.rda'
+#humannetpwd_1='./extdata/human/net.Rdata'
+#mousedatapwd_1='./extdata/mouse/ConsensusTOM-block.1.rda'
+#mousenetpwd_1='./extdata/mouse/net.Rdata'
 #load(humandatapwd_1)
 #humandata_1=consTomDS
 #load(mousedatapwd_1)
@@ -18,5 +18,5 @@
 #humanmodcolor_1='brown'
 #mousemodcolor_1='green'
 #load('./data/geneidlist.Rdata')
-#nccs(humangenes,mousegenes,humandatapwd_1,mousedatapwd_1,humannetpwd_1,mousenetpwd_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3))
+#nccs(humangene_1,mousegene_1,humandata_1,mousedata_1,humannet_1,mousenet_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3),mosttimes=500,quitname='result of nccsWGCNA',means=c("Human Transformational Adjacency Network","Mouse Transformational Adjacency Network","Human-Mouse Transformational Adjacency Network","Mouse-Human Transformational Adjacency Network"))
 
