@@ -1,0 +1,32 @@
+setwd('D:\\久远第四加护\\组会\\2023.6.5')
+library(igraph);
+library(RColorBrewer);
+#bule-brown
+load('bule-brown.Rdata')
+load("F:\\2023.2.24\\human\\ConsensusTOM-block.1.rda")
+humanconsTomDS=consTomDS
+load("F:\\2023.2.24\\human\\net.Rdata")
+humannet=net
+load("F:\\2023.2.24\\mouse\\ConsensusTOM-block.1.rda")
+mouseconsTomDS=consTomDS
+load("F:\\2023.2.24\\mouse\\net.Rdata")
+mousenet=net
+humanmodcolor='blue'
+mousemodcolor='brown'
+nccs(
+  allgenehuman,#humangene,
+  allgenemouse,#mousegene,
+  humanconsTomDS,#humandata,
+  mouseconsTomDS,#mousedata,
+  humannet,#humannet,
+  mousenet,#mousenet,
+  humanmodcolor,#humanmodcolor,
+  mousemodcolor,#mousemodcolor,
+  k = 20,
+  linecoloralpha = c(0.4, 0.4, 0.4, 0.4)
+)
+getwd()
+library(devtools)
+devtools:check()
+getwd()
+setwd('C:\\Users\\56412\\Documents\\nccsWGCNA')

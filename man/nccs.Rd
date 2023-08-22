@@ -20,7 +20,8 @@ nccs(
   means = c("Human Transformational Adjacency Network",
     "Mouse Transformational Adjacency Network",
     "Human-Mouse Transformational Adjacency Network",
-    "Mouse-Human Transformational Adjacency Network")
+    "Mouse-Human Transformational Adjacency Network"),
+  nettype = "net"
 )
 }
 \arguments{
@@ -28,11 +29,7 @@ nccs(
 
 \item{humandata, mousedata}{fill in the file 'ConsonsusTOM block. 1. rda' of human or mouse, which includes the variable 'consTomDS'.}
 
-\item{humannet, mousenet}{fill in the file 'net. rda' of human or mouse, which includes the variable 'net'.'consTomDS' and 'net' were generated during the execution of WGCNA.
-
-A code example for generating such files is:
-
-net=blockwiseConsensusModules(multiExpr, blocks = NULL,}
+\item{humannet, mousenet}{fill in the file 'net. rda' of human or mouse, which includes the variable 'net'.'consTomDS' and 'net' were generated during the execution of WGCNA. Just used for take names of genes in the whole TOMnetwork. A code example for generating such files is: net=blockwiseConsensusModules(multiExpr, blocks = NULL,...,saveConsensusTOMs = TRUE,consensusTOMFilePattern = "ConsensusTOM-block.1.rda")}
 
 \item{humanmodcolor, mousemodcolor}{The color of the module which you analyzed.}
 
@@ -43,6 +40,10 @@ net=blockwiseConsensusModules(multiExpr, blocks = NULL,}
 \item{mosttimes}{Specify the maximum range for searching for k values, default to 500}
 
 \item{quitname}{output file name}
+
+\item{means}{title in every picture}
+
+\item{nettype}{how to take out gene names}
 }
 \value{
 4 picture of net compare will be build in
@@ -52,5 +53,5 @@ This package provides a WGCNA net cross species comparison method for an unspeci
 This project is based on cross species comparison between humans and mice, so the two species to be compared are referred to as humans and mice in this project. But we believe that this can also be directly applied to comparative studies of other species.
 }
 \examples{
-nccs(humangene_1,mousegene_1,humandata_1,mousedata_1,humannet_1,mousenet_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3),mosttimes=500,quitname='result of nccsWGCNA',means=c("Human Transformational Adjacency Network","Mouse Transformational Adjacency Network","Human-Mouse Transformational Adjacency Network","Mouse-Human Transformational Adjacency Network"))
+nccs(humangene_1,mousegene_1,humandata_1,mousedata_1,humannet_1,mousenet_1,humanmodcolor_1,mousemodcolor_1,k=20,linecoloralpha=c(0.4,0.3,0.4,0.3),mosttimes=500,quitname='result of nccsWGCNA',means=c("Human Transformational Adjacency Network","Mouse Transformational Adjacency Network","Human-Mouse Transformational Adjacency Network","Mouse-Human Transformational Adjacency Network"),nettype='net')
 }
